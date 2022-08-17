@@ -29,7 +29,7 @@ func main() {
 
 	ctx := context.Background()
 
-	_, err = client.HttpMethods.Get(ctx)
+	_, err = client.HTTPMethods.Get(ctx)
 	if err != nil {
 		panic(fmt.Errorf("error calling GET: %w", err))
 	}

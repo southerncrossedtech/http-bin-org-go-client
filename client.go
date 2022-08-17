@@ -3,22 +3,22 @@ package httpbin
 import (
 	// log http requests
 
-	"io/ioutil"
-
-	"github.com/motemen/go-loghttp"
-
 	"bytes"
 	"context"
 	"crypto/tls"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"net/url"
 	"runtime"
 	"strings"
 	"time"
+
+	"github.com/motemen/go-loghttp"
 )
 
 // apiVersion is the API version in use by this client.
@@ -55,7 +55,7 @@ type Client struct {
 	Options Opts
 
 	// Services used for talking with different parts of the API
-	HttpMethods HttpMethodsService
+	HTTPMethods HTTPMethodsService
 }
 
 type serviceImpl struct {
@@ -127,7 +127,7 @@ func NewClient(opts *Opts) (*Client, error) {
 	}
 
 	// Setup client service implementations
-	client.HttpMethods = &httpMethodsImpl{client: client}
+	client.HTTPMethods = &httpMethodsImpl{client: client}
 
 	return client, nil
 }
@@ -191,18 +191,15 @@ func (c *Client) do(ctx context.Context, req *http.Request, v interface{}) (*res
 		case <-ctx.Done():
 			return nil, ctx.Err()
 		}
+
 		return nil, err
 	}
+
 	defer resp.Body.Close()
 
 	response := newResponse(resp)
 	if resp.StatusCode == http.StatusNoContent {
 		return response, nil
-		// } else if resp.StatusCode == http.StatusTooManyRequests {
-		// 	return nil, &RateLimitError{
-		// 		Response: resp,
-		// 		Rate:     response.rate,
-		// 	}
 	} else if v != nil && resp.StatusCode >= 200 && resp.StatusCode <= 299 {
 		// TODO: expand this part more to aid in effective debug ability
 		// TODO: Option to pass in a custom transport that logs using a passed in logger interface
@@ -213,7 +210,7 @@ func (c *Client) do(ctx context.Context, req *http.Request, v interface{}) (*res
 
 		if w, ok := v.(io.Writer); ok {
 			io.Copy(w, resp.Body)
-		} else if err := json.NewDecoder(resp.Body).Decode(&v); err != nil && err != io.EOF {
+		} else if err := json.NewDecoder(resp.Body).Decode(&v); err != nil && !errors.Is(err, io.EOF) {
 			return response, err
 		}
 

@@ -4,8 +4,8 @@ import (
 	"context"
 )
 
-// HttpMethodsService manages the interactions for httpbin http-methods.
-type HttpMethodsService interface {
+// HTTPMethodsService manages the interactions for httpbin http-methods.
+type HTTPMethodsService interface {
 	// List returns a pager to paginate plans. PagerOptions are used to optionally
 	// filter the results.
 	//
@@ -16,7 +16,7 @@ type HttpMethodsService interface {
 	// a nil plan and nil error are returned.
 	//
 	// https://dev.recurly.com/docs/lookup-plan-details
-	Get(ctx context.Context) (*HttpBin, error)
+	Get(ctx context.Context) (*HTTPBin, error)
 
 	// Create a new subscription plan.
 	//
@@ -36,8 +36,8 @@ type HttpMethodsService interface {
 	// Delete(ctx context.Context, code string) error
 }
 
-// HttpBin is the basic response
-type HttpBin struct {
+// HTTPBin is the basic response
+type HTTPBin struct {
 	Headers `json:"headers"`
 	URL     string `json:"url"`
 }
@@ -54,16 +54,16 @@ type Headers struct {
 	UserAgent      string `json:"user-agent,omitempty"`
 }
 
-var _ HttpMethodsService = &httpMethodsImpl{}
+var _ HTTPMethodsService = &httpMethodsImpl{}
 
-// httpMethodsImpl implements HttpMethodsService.
+// httpMethodsImpl implements HTTPMethodsService.
 type httpMethodsImpl serviceImpl
 
 // func (s *plansImpl) List(opts *PagerOptions) Pager {
 // 	return s.client.newPager("GET", "/plans", opts)
 // }
 
-func (s *httpMethodsImpl) Get(ctx context.Context) (*HttpBin, error) {
+func (s *httpMethodsImpl) Get(ctx context.Context) (*HTTPBin, error) {
 	// httbin has a very simple get path
 	path := "/get"
 
@@ -72,7 +72,7 @@ func (s *httpMethodsImpl) Get(ctx context.Context) (*HttpBin, error) {
 		return nil, err
 	}
 
-	var dst HttpBin
+	var dst HTTPBin
 	if _, err := s.client.do(ctx, req, &dst); err != nil {
 		// TODO: We'll add error handling soon
 		// if e, ok := err.(*ClientError); ok && e.Response.StatusCode == http.StatusNotFound {
