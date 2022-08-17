@@ -64,10 +64,7 @@ type httpMethodsImpl serviceImpl
 // }
 
 func (s *httpMethodsImpl) Get(ctx context.Context) (*HttpBin, error) {
-	// httbin has a very simple get path
-	path := "/get"
-
-	req, err := s.client.newRequest(ctx, "GET", path, nil)
+	req, err := s.client.newRequest(ctx, "GET", "/get", nil)
 	if err != nil {
 		return nil, err
 	}
